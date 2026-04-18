@@ -30,7 +30,9 @@ Then visit:
 
 ### Game
 - **Left-drag** a free (walking) goo ball → snap it onto the nearest
-  attached balls to extend your structure.
+  attached balls to extend your structure.  While holding the walker, faded
+  dashed goo-yellow preview lines appear between it and each ball it would
+  link to if released — so you can aim before you drop.
 - **R** reset the level.
 - **D** toggle debug overlay (particle positions, constraint stress,
   FPS, counts).

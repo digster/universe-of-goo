@@ -39,7 +39,9 @@ export class Renderer {
    * @param {import('../physics/world.js').World} world
    * @param {Object} scene
    * @param {Object} [scene.goal]            Goal pipe {x, y, radius, required, count}
-   * @param {Array}  [scene.drags]           Active drag indicators [{from:{x,y}, to:{x,y}, attachable:bool}]
+   * @param {Array}  [scene.drags]           Active drag indicators [{from:{x,y}, to:{x,y}, attachable:bool, preview?:bool}]
+   *                                          When `preview` is true the entry is rendered as a faded goo-yellow dashed
+   *                                          line representing a strand that would form on release.
    * @param {string} [scene.selectedType]    Sandbox only.
    * @param {boolean}[scene.gravityEnabled]  Sandbox only.
    * @param {number} [scene.iterations]      Sandbox only.
@@ -135,12 +137,23 @@ export class Renderer {
     }
 
     // --- 6. drag indicators ---
+    // Two visual modes share this loop:
+    //   • cursor/rubber-band line (default): cyan when attachable, red otherwise.
+    //   • preview strand (`preview: true`): faded goo-yellow matching the
+    //     rested strand colour, so the player sees exactly where a strand
+    //     will land if they release now. Slightly thicker than the cursor
+    //     line to read as a "real future strand".
     if (scene.drags) {
       for (const d of scene.drags) {
-        const color = d.attachable ? '#7dd3fc' : '#f87171';
         ctx.save();
         ctx.setLineDash([6, 4]);
-        line(ctx, d.from, d.to, color, 2);
+        if (d.preview) {
+          ctx.globalAlpha = 0.45;
+          line(ctx, d.from, d.to, 'hsl(45, 70%, 55%)', 3);
+        } else {
+          const color = d.attachable ? '#7dd3fc' : '#f87171';
+          line(ctx, d.from, d.to, color, 2);
+        }
         ctx.restore();
       }
     }

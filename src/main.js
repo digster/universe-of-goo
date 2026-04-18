@@ -16,7 +16,7 @@ import { fetchLevel, buildLevel } from './game/level.js';
 import { Renderer } from './render/renderer.js';
 import { Pointer } from './input/pointer.js';
 import { applyPreStepBehaviour } from './game/gooball.js';
-import { attachFreeBall } from './game/strandRules.js';
+import { attachFreeBall, pickAttachmentCandidates } from './game/strandRules.js';
 import { tickGoal, isWon } from './game/goal.js';
 import { createGameState, setState } from './game/gameState.js';
 import { warpTo, pin, unpin } from './physics/particle.js';
@@ -134,12 +134,35 @@ async function boot() {
     }
 
     if (scene) {
-      renderer.draw(scene.world, {
-        goal: scene.goal,
-        drags: dragging
-          ? [{ from: cursor, to: dragging.ball.particle, attachable: true }]
-          : null,
-      });
+      // Build drag indicators. The first entry is the cursor-to-ball rubber
+      // band (existing behaviour). If the dragged ball is a free walker, we
+      // also preview the strands that would form on release — honest because
+      // we call the same `pickAttachmentCandidates` that `attachFreeBall` uses
+      // internally, with matching `radius: 160` and `maxCount = type.maxStrands`.
+      // CRITICAL: if `attachFreeBall`'s params in strandRules.js ever change,
+      // update the preview params here too. tests/preview.test.js guards this.
+      let drags = null;
+      if (dragging) {
+        drags = [{ from: cursor, to: dragging.ball.particle, attachable: true }];
+        if (dragging.ball.strands.length === 0) {
+          const type = getType(dragging.ball.type);
+          const candidates = pickAttachmentCandidates(
+            dragging.ball.particle,
+            scene.balls,
+            scene.world.segments,
+            { maxCount: type.maxStrands, radius: 160 }
+          );
+          for (const cand of candidates) {
+            drags.push({
+              from: dragging.ball.particle,
+              to: cand.particle,
+              attachable: true,
+              preview: true,
+            });
+          }
+        }
+      }
+      renderer.draw(scene.world, { goal: scene.goal, drags });
       hud.fps.textContent = `${renderer.fps.toFixed(0)} fps`;
       hud.count.textContent = `${scene.goal.count} / ${scene.goal.required}`;
     }
