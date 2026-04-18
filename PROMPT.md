@@ -9,3 +9,4 @@
 ## 2026-04-18
 
 - We should be able to preview the link to the ball it might attach to before attaching. Currently we can't see it.
+- The sandbox mode should have similar dynamics to the main game mode. The sandbox mode should not have a custom shift + drag mode but should behave like the game mode but with unlimited balls.

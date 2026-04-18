@@ -4,11 +4,15 @@
 // Owns a World and a list of GooBalls (no goal, no win condition). Exposes
 // operations that the HUD and pointer handlers call:
 //
-//   spawn(type, x, y)
+//   spawn(type, x, y) → add a ball at (x,y); fixed type starts attached,
+//                       all other types start as free walkers
 //   pick(x, y)        → nearest ball within grab radius, or null
-//   linkBetween(a, b) → create a manual strand
+//   pickConstraint()  → nearest strand to (x, y), or null
 //   deleteAt(x, y)    → remove ball OR strand under the cursor
-//   togglePinAt(x, y)
+//   togglePinAt(x, y) → flip ball.pinned
+//   linkBetween(a, b) → create a strand programmatically (used by the seed
+//                       scene and snapshot restore — NOT a user gesture
+//                       any more; sandbox mirrors game-mode auto-attach)
 //   clear()           → remove all balls and strands
 //   save() / restore()→ localStorage snapshot
 //   tick(cursor, dt)  → per-frame pre-step behaviour + physics step
@@ -20,7 +24,7 @@
 import { World } from '../physics/world.js';
 import { makeGooBall, applyPreStepBehaviour } from './gooball.js';
 import { makeConstraint } from '../physics/constraint.js';
-import { warpTo, pin, unpin } from '../physics/particle.js';
+import { pin, unpin } from '../physics/particle.js';
 import { getType } from './gootypes.js';
 import { closestPointOnSegment } from '../physics/vec2.js';
 
@@ -52,14 +56,16 @@ export class SandboxController {
   }
 
   // --- entity operations -------------------------------------------------
+  // Spawn semantics mirror the game: `fixed` balls are anchors (attached =
+  // true, pinned), so they're immediately valid attachment candidates.
+  // All other types spawn as free walkers (attached = false) — they fall
+  // and only attach when the player drags + releases them near other balls,
+  // exactly like dragging a free walker in game mode. We rely on the
+  // `attached: opts.attached ?? pinned` default in makeGooBall().
   spawn(typeName, x, y) {
-    const ball = makeGooBall(typeName, x, y, { attached: false });
+    const ball = makeGooBall(typeName, x, y);
     this.balls.push(ball);
     this.world.addParticle(ball.particle);
-    // In the sandbox we treat all balls as "attached" for strand purposes,
-    // since there's no walker/attached distinction — every ball is legal
-    // to link.
-    ball.attached = true;
     return ball;
   }
 
@@ -86,6 +92,11 @@ export class SandboxController {
     return best;
   }
 
+  // Programmatic strand creation between two balls. Used by the seed scene
+  // and by load() to restore snapshots — NOT exposed as a user gesture
+  // (sandbox no longer has shift-drag manual linking). Once linked, both
+  // balls are considered "attached" so they're valid candidates for further
+  // proximity-based attachment via strandRules.
   linkBetween(a, b) {
     if (!a || !b || a === b) return null;
     const typeA = getType(a.type);
@@ -98,6 +109,8 @@ export class SandboxController {
     this.world.addConstraint(c);
     a.strands.push(c);
     b.strands.push(c);
+    a.attached = true;
+    b.attached = true;
     return c;
   }
 
@@ -149,23 +162,6 @@ export class SandboxController {
     this.balls = [];
     this.world.particles = [];
     this.world.constraints = [];
-  }
-
-  // --- drag handling -----------------------------------------------------
-  // Used by sandbox.js to make a picked ball follow the cursor.
-  grab(ball) {
-    ball._prevPinned = ball.pinned;
-    pin(ball.particle);
-  }
-  release(ball) {
-    if (!ball._prevPinned) {
-      const type = getType(ball.type);
-      unpin(ball.particle, type.mass);
-    }
-    ball._prevPinned = undefined;
-  }
-  drag(ball, x, y) {
-    warpTo(ball.particle, x, y);
   }
 
   // --- serialization -----------------------------------------------------

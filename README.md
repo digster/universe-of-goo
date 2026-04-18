@@ -38,11 +38,19 @@ Then visit:
   FPS, counts).
 
 ### Sandbox
-- **Left-drag** empty space → spawn a ball of the selected type on release.
-- **Left-drag** a ball → move it (temporarily pinned to cursor).
-- **Shift-drag** between two balls → create a manual strand.
+The sandbox uses the same gestures as the game — you spawn unlimited balls
+and connect them with the same proximity-based attachment rules.
+- **Left-click** empty space → spawn a ball of the selected type at the
+  cursor. `fixed` balls spawn as anchors; all other types spawn as free
+  walkers and fall under gravity.
+- **Left-drag** a ball → pick it up and follow the cursor. On release, if
+  it had no strands it auto-attaches to nearby balls via the same
+  `strandRules` the game uses (dashed goo-yellow preview lines show the
+  strands that will form). If it already had strands, releasing just
+  repositions it.
 - **Right-click** ball or strand → delete.
-- **Middle-click** ball → toggle pin.
+- **Middle-click** ball → toggle pin (pinned balls can't be picked up;
+  middle-click again to unpin).
 - Keys: `1`–`4` select basic / balloon / sticky / fixed; `G` toggles
   gravity; `P` pause; `D` debug overlay; `S` save snapshot; `R` restore
   snapshot; `C` clear; `+` / `−` tune constraint iteration count live.
