@@ -1,0 +1,23 @@
+{
+  "name": "universe-of-goo",
+  "version": "0.1.0",
+  "description": "A World of Goo–inspired soft-body physics game, built as a teaching codebase with an interactive documentation site. Hand-rolled Verlet integration + constraint relaxation.",
+  "type": "module",
+  "author": "digster",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "e2e:install": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "jsdom": "^25.0.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.1.0"
+  }
+}

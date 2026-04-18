@@ -1,0 +1,174 @@
+/*
+ * Universe of Goo — shared game styling
+ * --------------------------------------------------------------------------
+ * Targets the game (index.html) and the sandbox (sandbox.html). The docs site
+ * has its own stylesheet (docs/styles.css) so doc pages can be styled for
+ * long-form reading rather than full-bleed gameplay.
+ */
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: radial-gradient(circle at 50% 0%, #1c2437 0%, #0b0f1c 60%, #06080f 100%);
+  color: #e8ecf4;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+}
+
+.game-shell {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr;
+  min-height: 100%;
+  height: 100%;
+}
+
+.sandbox-shell {
+  grid-template-rows: auto 1fr auto auto;
+}
+
+.game-hud {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(8, 12, 24, 0.75);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.hud-title {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-right: 4px;
+}
+
+.hud-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-variant-numeric: tabular-nums;
+  color: #b9c4d6;
+  font-size: 12px;
+}
+
+.hud-links {
+  margin-left: auto;
+  display: flex;
+  gap: 14px;
+}
+.hud-links a {
+  color: #7dd3fc;
+  text-decoration: none;
+  font-size: 13px;
+}
+.hud-links a:hover { text-decoration: underline; }
+
+.game-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #07090f;
+}
+
+canvas#stage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* The canvas' internal resolution is the level's logical bounds (1280x720
+   * by convention). CSS scales it to fit the viewport, so gameplay stays
+   * identical regardless of window size. Pointer events are re-mapped back
+   * to canvas coordinates in src/input/pointer.js. */
+  touch-action: none;
+  image-rendering: auto;
+  max-width: 100vw;
+  max-height: 100%;
+  aspect-ratio: 1280 / 720;
+  background: linear-gradient(180deg, #0d1424 0%, #0a0e1a 100%);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(6, 9, 18, 0.8);
+  backdrop-filter: blur(10px);
+}
+/* The `hidden` HTML attribute normally sets display:none, but .overlay's
+ * display:grid above has equal specificity and wins by source order. Force
+ * hidden to take precedence. */
+.overlay[hidden] { display: none; }
+.overlay h2 {
+  font-size: 28px;
+  margin: 0 0 8px;
+}
+.overlay p {
+  margin: 0 0 16px;
+  color: #b9c4d6;
+}
+.overlay button {
+  background: #2b6cb0;
+  color: white;
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 18px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.overlay button:hover { background: #3182ce; }
+
+.game-help {
+  padding: 10px 16px;
+  background: rgba(8, 12, 24, 0.7);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  color: #8a95aa;
+}
+.game-help kbd {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+}
+
+.sandbox-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(8, 12, 24, 0.9);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.sandbox-tools button {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e8ecf4;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.sandbox-tools button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.sandbox-tools button.active {
+  background: #2b6cb0;
+  border-color: #3182ce;
+}
+.sandbox-tools .tool-sep {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 2px 6px;
+}

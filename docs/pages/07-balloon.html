@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>07 — Balloon lift · Universe of Goo</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="docs-layout">
+
+    <aside class="docs-sidebar">
+      <h1><a href="../index.html" style="color:inherit">Universe of Goo</a></h1>
+      <p class="tagline">Source-first physics docs.</p>
+      <ol>
+        <li><a href="./01-particle.html">Particle &amp; Verlet</a></li>
+        <li><a href="./02-spring.html">Two-particle spring</a></li>
+        <li><a href="./03-chain.html">Chain / rope</a></li>
+        <li><a href="./04-cloth.html">Cloth grid</a></li>
+        <li><a href="./05-tower.html">Tower stability</a></li>
+        <li><a href="./06-gooball.html">Full goo ball</a></li>
+        <li><a href="./07-balloon.html" class="active">Balloon lift</a></li>
+      </ol>
+      <div class="links">
+        <a href="../../index.html">▶ Game</a>
+        <a href="../../sandbox.html">▣ Sandbox</a>
+      </div>
+    </aside>
+
+    <main class="docs-main">
+      <h1>07 · Balloon lift</h1>
+      <p class="lede">
+        The balloon ball adds a per-particle upward force that pulls its
+        attached structure skyward. It's the first place we step outside the
+        uniform gravity field and into per-entity behaviour.
+      </p>
+
+      <h2>Per-particle force accumulators</h2>
+      <p>
+        Each <code>Particle</code> carries <code>fx, fy</code> force
+        accumulator fields, reset every step. Before the integrator runs,
+        each goo type's <code>applyPreStepBehaviour</code> hook may add its
+        own contribution. For the balloon:
+      </p>
+      <pre class="math">// src/game/gooball.js
+if type === 'balloon':
+    scale = attached ? 1 : 0.5        // floats up faster when loaded
+    particle.fy -= liftStrength · scale</pre>
+      <p>
+        The Verlet integrator then folds <code>(fx, fy)</code> into the
+        acceleration along with global gravity:
+      </p>
+      <pre class="math">ax = gx + fx · invMass
+ay = gy + fy · invMass
+(x, y) += (x - oldX, y - oldY) · (1 - damping) + (ax, ay) · dt²</pre>
+      <p>
+        No special-casing in the integrator — the balloon is just a
+        particle with a non-zero <code>fy</code>. Any gameplay behaviour
+        that looks like "something pulls me" can be expressed the same way:
+        wind, magnets, fans, conveyor belts.
+      </p>
+
+      <h2>Why the "attached" multiplier?</h2>
+      <p>
+        A balloon that's already floating away from its tower contributes
+        nothing to lifting the structure — so we don't need to pay the full
+        force. Halving the lift when detached makes the scene feel right:
+        free balloons drift up gently; attached ones do the work.
+      </p>
+
+      <h2>Live demo</h2>
+      <p>
+        The chain is anchored to the floor and rises up to a single balloon
+        ball on top. Toggle <em>lift</em> off to see gravity win (the
+        balloon's weight drags the chain a little); toggle on to watch the
+        whole chain swing upward. The readout shows the balloon's height
+        above the floor.
+      </p>
+
+      <div class="demo">
+        <div class="demo-canvas-wrap"><canvas></canvas></div>
+        <div class="demo-controls">
+          <label>Lift
+            <input type="checkbox" data-key="lift" checked />
+            <span></span>
+          </label>
+          <label>Lift state
+            <span></span>
+            <output data-key="lift">on</output>
+          </label>
+          <label>Balloon height
+            <span></span>
+            <output data-key="top">0 px</output>
+          </label>
+          <label style="align-items:end">
+            <span></span>
+            <button data-key="reset">Reset</button>
+          </label>
+        </div>
+      </div>
+
+      <blockquote>
+        In the game, levels 03-balloon-lift is built around this mechanic:
+        attach enough balloons to your goo tower and it <em>literally</em>
+        floats the structure across a chasm.
+      </blockquote>
+
+      <h2>Where to go from here</h2>
+      <p>
+        You've now seen every layer of the engine — integration, constraints,
+        collisions, goo types, attachment rules, per-particle forces. Dive
+        into the game itself and try to build a tower that reaches the goal,
+        or open the sandbox and spawn a hundred balls just to see what
+        happens.
+      </p>
+      <div class="hero-grid">
+        <a class="hero-card" href="../../index.html">
+          <span class="num">▶</span>
+          <h3>Play the game</h3>
+          <p>Three hand-authored levels, a goal pipe, and victory screens.</p>
+        </a>
+        <a class="hero-card" href="../../sandbox.html">
+          <span class="num">▣</span>
+          <h3>Open the sandbox</h3>
+          <p>Spawn any goo type, retune iterations live, save snapshots.</p>
+        </a>
+      </div>
+
+      <nav class="pager">
+        <a href="./06-gooball.html">
+          <span class="label">← Prev</span>
+          06 · Full goo ball
+        </a>
+        <a href="../index.html">
+          <span class="label">End</span>
+          Back to overview
+        </a>
+      </nav>
+
+      <footer class="docs-footer">
+        <span>MIT © digster</span>
+        <span><a href="../index.html">Docs home</a></span>
+      </footer>
+    </main>
+  </div>
+  <script type="module" src="../demos/07-balloon.js"></script>
+</body>
+</html>

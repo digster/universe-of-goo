@@ -1,0 +1,14 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]: Universe of Goo
+    - generic [ref=e4]: First Tower
+    - generic [ref=e5]: 0 / 5
+    - generic [ref=e6]: 60 fps
+    - navigation [ref=e7]:
+      - link "Sandbox" [ref=e8] [cursor=pointer]:
+        - /url: ./sandbox.html
+      - link "Docs" [ref=e9] [cursor=pointer]:
+        - /url: ./docs/index.html
+  - main [ref=e10]:
+    - generic "Game canvas" [ref=e11]
+  - contentinfo [ref=e12]: Click and drag a goo ball onto your structure. Build toward the pipe. Press D for debug, R to reset.

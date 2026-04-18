@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Universe of Goo</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body class="game-shell">
+    <!--
+      The game canvas is sized to match the level's bounds at 1:1; CSS scales
+      it down to fit the viewport while preserving aspect ratio. See
+      src/render/renderer.js for how the logical coordinate system maps to
+      canvas pixels.
+    -->
+    <header class="game-hud" id="hud">
+      <span class="hud-title">Universe of Goo</span>
+      <span class="hud-chip" id="hud-level">Loading…</span>
+      <span class="hud-chip" id="hud-count">0 / 0</span>
+      <span class="hud-chip" id="hud-fps">60 fps</span>
+      <nav class="hud-links">
+        <a href="./sandbox.html">Sandbox</a>
+        <a href="./docs/index.html">Docs</a>
+      </nav>
+    </header>
+    <main class="game-stage">
+      <canvas id="stage" width="1280" height="720" aria-label="Game canvas"></canvas>
+      <div class="overlay" id="overlay" hidden>
+        <h2 id="overlay-title">Level complete</h2>
+        <p id="overlay-body">You delivered all the goo balls.</p>
+        <button id="overlay-next" type="button">Next level</button>
+      </div>
+    </main>
+    <footer class="game-help">
+      Click and drag a goo ball onto your structure. Build toward the pipe. Press
+      <kbd>D</kbd> for debug, <kbd>R</kbd> to reset.
+    </footer>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

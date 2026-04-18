@@ -1,0 +1,128 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - heading "Universe of Goo" [level=1] [ref=e4]:
+      - link "Universe of Goo" [ref=e5] [cursor=pointer]:
+        - /url: ../index.html
+    - paragraph [ref=e6]: Source-first physics docs.
+    - list [ref=e7]:
+      - listitem [ref=e8]:
+        - link "Particle & Verlet" [ref=e9] [cursor=pointer]:
+          - /url: ./01-particle.html
+      - listitem [ref=e10]:
+        - link "Two-particle spring" [ref=e11] [cursor=pointer]:
+          - /url: ./02-spring.html
+      - listitem [ref=e12]:
+        - link "Chain / rope" [ref=e13] [cursor=pointer]:
+          - /url: ./03-chain.html
+      - listitem [ref=e14]:
+        - link "Cloth grid" [ref=e15] [cursor=pointer]:
+          - /url: ./04-cloth.html
+      - listitem [ref=e16]:
+        - link "Tower stability" [ref=e17] [cursor=pointer]:
+          - /url: ./05-tower.html
+      - listitem [ref=e18]:
+        - link "Full goo ball" [ref=e19] [cursor=pointer]:
+          - /url: ./06-gooball.html
+      - listitem [ref=e20]:
+        - link "Balloon lift" [ref=e21] [cursor=pointer]:
+          - /url: ./07-balloon.html
+    - generic [ref=e22]:
+      - link "▶ Game" [ref=e23] [cursor=pointer]:
+        - /url: ../../index.html
+      - link "▣ Sandbox" [ref=e24] [cursor=pointer]:
+        - /url: ../../sandbox.html
+  - main [ref=e25]:
+    - heading "01 · Particle & Verlet" [level=1] [ref=e26]
+    - paragraph [ref=e27]: "Everything in this engine is built from one idea: a particle that remembers where it just was. That single fact is enough to integrate gravity, collide off walls, and — in later pages — hold an entire structure together."
+    - heading "Why Verlet, not Euler?" [level=2] [ref=e28]
+    - paragraph [ref=e29]:
+      - text: Textbook explicit-Euler integration tracks
+      - code [ref=e30]: position
+      - text: and
+      - code [ref=e31]: velocity
+      - text: as two separate fields and steps them with
+      - code [ref=e32]: v += a·dt; x += v·dt
+      - text: . That works, but position-based constraint solvers (the whole engine from the next page onward) want to edit positions
+      - emphasis [ref=e33]: directly
+      - text: . If you move a particle inside the solver, a separately-stored velocity is now out of sync — you'd have to patch it back every time.
+    - paragraph [ref=e34]:
+      - strong [ref=e35]: Verlet integration
+      - text: sidesteps that by not storing velocity at all. Each particle remembers its current position
+      - code [ref=e36]: (x, y)
+      - text: and its position from the
+      - emphasis [ref=e37]: previous
+      - text: step
+      - code [ref=e38]: (oldX, oldY)
+      - text: . The difference between the two
+      - emphasis [ref=e39]: is
+      - text: the velocity, implicitly. Move a particle's
+      - code [ref=e40]: x
+      - text: and its effective velocity changes automatically — exactly what the constraint solver needs.
+    - heading "The integration step" [level=2] [ref=e41]
+    - paragraph [ref=e42]:
+      - text: One step of Verlet on a particle looks like this (
+      - link "src/physics/integrator.js" [ref=e43] [cursor=pointer]:
+        - /url: ../../src/physics/integrator.js
+        - code [ref=e44]: src/physics/integrator.js
+      - text: "):"
+    - generic [ref=e45]: temp = (x, y) (x, y) = (x, y) + (x - oldX, y - oldY) · (1 - damping) + a · dt² (oldX, oldY) = temp
+    - paragraph [ref=e46]:
+      - text: "Reading right-to-left: the new position is the old position plus the implicit velocity (scaled down by damping) plus the acceleration term. Then we shuffle the old position forward so next step's"
+      - code [ref=e47]: (x - oldX)
+      - text: gives us the updated velocity.
+    - blockquote [ref=e48]:
+      - strong [ref=e49]: Pinned particles
+      - text: set
+      - code [ref=e50]: invMass = 0
+      - text: . The integrator skips them and the constraint solver divides their correction by zero weight, so they never move — no branching needed downstream.
+    - heading "Live demo" [level=2] [ref=e51]
+    - paragraph [ref=e52]:
+      - text: Drag the
+      - emphasis [ref=e53]: damping
+      - text: slider to see how under-damped motion keeps energy, while
+      - emphasis [ref=e54]: initial VX
+      - text: gives the particle sideways momentum on launch. Click anywhere on the canvas to relaunch the particle from that spot.
+    - generic [ref=e58]:
+      - generic [ref=e59]:
+        - text: Damping
+        - slider "Damping" [ref=e60]: "0.01"
+        - status [ref=e61]: "0.010"
+      - generic [ref=e62]:
+        - text: Initial VX
+        - slider "Initial VX" [ref=e63]: "3"
+        - status [ref=e64]: "3.00"
+      - generic [ref=e65]:
+        - text: Velocity
+        - status "Velocity" [ref=e66]: 0.00 px/step
+      - button [ref=e68] [cursor=pointer]: Reset
+    - heading "Where this lives in the code" [level=2] [ref=e69]
+    - list [ref=e70]:
+      - listitem [ref=e71]:
+        - link "src/physics/particle.js" [ref=e72] [cursor=pointer]:
+          - /url: ../../src/physics/particle.js
+          - code [ref=e73]: src/physics/particle.js
+        - text: —
+        - code [ref=e74]: makeParticle(x, y, opts)
+        - text: factory with
+        - code [ref=e75]: x, y, oldX, oldY, invMass, radius
+        - text: .
+      - listitem [ref=e76]:
+        - link "src/physics/integrator.js" [ref=e77] [cursor=pointer]:
+          - /url: ../../src/physics/integrator.js
+          - code [ref=e78]: src/physics/integrator.js
+        - text: —
+        - code [ref=e79]: verletStep(p, dt, gx, gy, damping)
+        - text: is exactly the four lines above.
+    - navigation [ref=e80]:
+      - link "← Back Overview" [ref=e81] [cursor=pointer]:
+        - /url: ../index.html
+        - generic [ref=e82]: ← Back
+        - text: Overview
+      - link "Next → 02 · Two-particle spring" [ref=e83] [cursor=pointer]:
+        - /url: ./02-spring.html
+        - generic [ref=e84]: Next →
+        - text: 02 · Two-particle spring
+    - generic [ref=e85]:
+      - generic [ref=e86]: MIT © digster
+      - link "Docs home" [ref=e88] [cursor=pointer]:
+        - /url: ../index.html

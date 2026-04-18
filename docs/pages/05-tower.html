@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>05 — Tower stability · Universe of Goo</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="docs-layout">
+
+    <aside class="docs-sidebar">
+      <h1><a href="../index.html" style="color:inherit">Universe of Goo</a></h1>
+      <p class="tagline">Source-first physics docs.</p>
+      <ol>
+        <li><a href="./01-particle.html">Particle &amp; Verlet</a></li>
+        <li><a href="./02-spring.html">Two-particle spring</a></li>
+        <li><a href="./03-chain.html">Chain / rope</a></li>
+        <li><a href="./04-cloth.html">Cloth grid</a></li>
+        <li><a href="./05-tower.html" class="active">Tower stability</a></li>
+        <li><a href="./06-gooball.html">Full goo ball</a></li>
+        <li><a href="./07-balloon.html">Balloon lift</a></li>
+      </ol>
+      <div class="links">
+        <a href="../../index.html">▶ Game</a>
+        <a href="../../sandbox.html">▣ Sandbox</a>
+      </div>
+    </aside>
+
+    <main class="docs-main">
+      <h1>05 · Tower stability</h1>
+      <p class="lede">
+        Why does a World-of-Goo-style tower stand at all? Because every
+        rectangle is secretly two triangles. Without the diagonal, the
+        quadrilateral is a floppy hinge; with it, the whole cell is rigid.
+      </p>
+
+      <h2>The rigidity trick</h2>
+      <p>
+        A quadrilateral with only its four edges constrained has one degree
+        of freedom: it can shear into a rhombus without any edge changing
+        length. Adding <em>one</em> diagonal forces the two triangles formed
+        to be rigid, because a triangle with all three side lengths fixed
+        cannot deform without changing one of them — basic Euclidean geometry.
+      </p>
+      <p>
+        The tower in the demo is built level-by-level: two columns of
+        particles per level, horizontal crossbars, vertical columns, and
+        optionally two diagonals per cell. Toggle <em>triangulate</em> off
+        and the tower shears over; on, and it stands rigid under its own
+        weight.
+      </p>
+
+      <h2>Reading the stress colour</h2>
+      <p>
+        Each constraint is drawn with a hue based on its
+        <code>stressRatio = currentLength / restLength</code>:
+      </p>
+      <pre class="math">t   = clamp(|ratio - 1| / 0.5, 0, 1)
+hue = 120 · (1 - t)       // green at rest, red under load</pre>
+      <p>
+        Green means "near rest length"; red means the constraint is stretched
+        or compressed. Watch which diagonals light up when the tower leans —
+        that's where the load is flowing.
+      </p>
+
+      <h2>Live demo</h2>
+      <p>
+        Toggle triangulation to compare. Pinned particles at the base are
+        drawn gold; free particles are blue. With triangulation on, only
+        small stresses appear under gravity. Without, the whole stack
+        collapses in seconds.
+      </p>
+
+      <div class="demo">
+        <div class="demo-canvas-wrap"><canvas></canvas></div>
+        <div class="demo-controls">
+          <label>Triangulate
+            <input type="checkbox" data-key="triangulate" checked />
+            <span></span>
+          </label>
+          <label>Triangulate state
+            <span></span>
+            <output data-key="triangulate">on</output>
+          </label>
+          <label>Worst stress
+            <span></span>
+            <output data-key="stress">0.000</output>
+          </label>
+          <label style="align-items:end">
+            <span></span>
+            <button data-key="reset">Rebuild</button>
+          </label>
+        </div>
+      </div>
+
+      <blockquote>
+        The real game adds one more layer on top: strand <code>maxStretch</code>.
+        Without it, any tower stands forever — no matter how cruel your
+        level design is.
+      </blockquote>
+
+      <nav class="pager">
+        <a href="./04-cloth.html">
+          <span class="label">← Prev</span>
+          04 · Cloth grid
+        </a>
+        <a href="./06-gooball.html">
+          <span class="label">Next →</span>
+          06 · Full goo ball
+        </a>
+      </nav>
+
+      <footer class="docs-footer">
+        <span>MIT © digster</span>
+        <span><a href="../index.html">Docs home</a></span>
+      </footer>
+    </main>
+  </div>
+  <script type="module" src="../demos/05-tower.js"></script>
+</body>
+</html>

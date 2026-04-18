@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>02 — Two-particle spring · Universe of Goo</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="docs-layout">
+
+    <aside class="docs-sidebar">
+      <h1><a href="../index.html" style="color:inherit">Universe of Goo</a></h1>
+      <p class="tagline">Source-first physics docs.</p>
+      <ol>
+        <li><a href="./01-particle.html">Particle &amp; Verlet</a></li>
+        <li><a href="./02-spring.html" class="active">Two-particle spring</a></li>
+        <li><a href="./03-chain.html">Chain / rope</a></li>
+        <li><a href="./04-cloth.html">Cloth grid</a></li>
+        <li><a href="./05-tower.html">Tower stability</a></li>
+        <li><a href="./06-gooball.html">Full goo ball</a></li>
+        <li><a href="./07-balloon.html">Balloon lift</a></li>
+      </ol>
+      <div class="links">
+        <a href="../../index.html">▶ Game</a>
+        <a href="../../sandbox.html">▣ Sandbox</a>
+      </div>
+    </aside>
+
+    <main class="docs-main">
+      <h1>02 · Two-particle spring</h1>
+      <p class="lede">
+        A single distance constraint between two particles is the building
+        block of every rope, cloth, tower and goo strand in the game. Instead
+        of integrating spring forces, we project positions directly — a trick
+        popularised by Thomas Jakobsen (Hitman's ragdolls, 2001).
+      </p>
+
+      <h2>Position-based, not force-based</h2>
+      <p>
+        A classical Hookean spring adds a force
+        <code>F = k · (len - restLen)</code> to each endpoint each frame. That
+        works but needs very small timesteps at high stiffness, otherwise the
+        spring overshoots and explodes.
+      </p>
+      <p>
+        The Verlet world lets us do something simpler: measure the current
+        distance, compute how far each endpoint needs to move to restore the
+        rest length, and <em>just move them</em>. Velocity takes care of
+        itself because it's encoded in the old position.
+      </p>
+
+      <h2>The relaxation step</h2>
+      <p>
+        This is the complete solver for a single stick
+        (<a href="../../src/physics/constraint.js"><code>src/physics/constraint.js</code></a>):
+      </p>
+      <pre class="math">d     = b.pos - a.pos
+len   = |d|
+if len > restLength · maxStretch: broken = true; return
+diff  = (len - restLength) / len
+wA    = a.invMass / (a.invMass + b.invMass)
+wB    = 1 - wA
+a.pos += d · (stiffness · diff · wA)
+b.pos -= d · (stiffness · diff · wB)</pre>
+      <p>
+        One pass usually isn't enough: fixing constraint A can violate
+        constraint B. The fix is to loop — run the pass N times per step. More
+        iterations &rArr; stiffer system. The slider below lets you feel that
+        trade-off.
+      </p>
+
+      <blockquote>
+        Splitting the correction by inverse mass means a pinned particle
+        (<code>invMass = 0</code>) absorbs <em>zero</em> correction, and its
+        partner absorbs the full amount. No special case needed in the solver.
+      </blockquote>
+
+      <h2>Live demo</h2>
+      <p>
+        Two balls, one constraint. Drag either ball to perturb. Crank
+        <em>iterations</em> low and you'll see the constraint visibly
+        stretch before recovering over several frames. Set
+        <em>stiffness</em> to 0.2 and it'll sag like a rubber band.
+      </p>
+
+      <div class="demo">
+        <div class="demo-canvas-wrap"><canvas></canvas></div>
+        <div class="demo-controls">
+          <label>Rest length
+            <input type="range" data-key="rest" min="60" max="400" step="1" value="240" />
+            <output data-key="rest">240</output>
+          </label>
+          <label>Stiffness
+            <input type="range" data-key="stiffness" min="0.05" max="1" step="0.01" value="0.9" />
+            <output data-key="stiffness">0.90</output>
+          </label>
+          <label>Iterations
+            <input type="range" data-key="iters" min="1" max="20" step="1" value="6" />
+            <output data-key="iters">6</output>
+          </label>
+          <label>Current stretch
+            <span></span>
+            <output data-key="stretch">1.00</output>
+          </label>
+          <label style="align-items:end">
+            <span></span>
+            <button data-key="reset">Reset</button>
+          </label>
+        </div>
+      </div>
+
+      <h2>Code map</h2>
+      <ul>
+        <li><code>makeConstraint(a, b, {restLength, stiffness, maxStretch})</code> — factory; defaults <code>restLength</code> to current distance.</li>
+        <li><code>solveConstraint(c)</code> — the math block above.</li>
+        <li><code>stressRatio(c)</code> — returns <code>len / restLength</code>, used by the tower demo to tint under-tension edges.</li>
+      </ul>
+
+      <nav class="pager">
+        <a href="./01-particle.html">
+          <span class="label">← Prev</span>
+          01 · Particle &amp; Verlet
+        </a>
+        <a href="./03-chain.html">
+          <span class="label">Next →</span>
+          03 · Chain / rope
+        </a>
+      </nav>
+
+      <footer class="docs-footer">
+        <span>MIT © digster</span>
+        <span><a href="../index.html">Docs home</a></span>
+      </footer>
+    </main>
+  </div>
+  <script type="module" src="../demos/02-spring.js"></script>
+</body>
+</html>

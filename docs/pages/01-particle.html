@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>01 — Particle &amp; Verlet · Universe of Goo</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="docs-layout">
+
+    <aside class="docs-sidebar">
+      <h1><a href="../index.html" style="color:inherit">Universe of Goo</a></h1>
+      <p class="tagline">Source-first physics docs.</p>
+      <ol>
+        <li><a href="./01-particle.html" class="active">Particle &amp; Verlet</a></li>
+        <li><a href="./02-spring.html">Two-particle spring</a></li>
+        <li><a href="./03-chain.html">Chain / rope</a></li>
+        <li><a href="./04-cloth.html">Cloth grid</a></li>
+        <li><a href="./05-tower.html">Tower stability</a></li>
+        <li><a href="./06-gooball.html">Full goo ball</a></li>
+        <li><a href="./07-balloon.html">Balloon lift</a></li>
+      </ol>
+      <div class="links">
+        <a href="../../index.html">▶ Game</a>
+        <a href="../../sandbox.html">▣ Sandbox</a>
+      </div>
+    </aside>
+
+    <main class="docs-main">
+      <h1>01 · Particle &amp; Verlet</h1>
+      <p class="lede">
+        Everything in this engine is built from one idea: a particle that
+        remembers where it just was. That single fact is enough to integrate
+        gravity, collide off walls, and — in later pages — hold an entire
+        structure together.
+      </p>
+
+      <h2>Why Verlet, not Euler?</h2>
+      <p>
+        Textbook explicit-Euler integration tracks <code>position</code> and
+        <code>velocity</code> as two separate fields and steps them with
+        <code>v += a·dt; x += v·dt</code>. That works, but position-based
+        constraint solvers (the whole engine from the next page onward) want
+        to edit positions <em>directly</em>. If you move a particle inside the
+        solver, a separately-stored velocity is now out of sync — you'd have
+        to patch it back every time.
+      </p>
+      <p>
+        <strong>Verlet integration</strong> sidesteps that by not storing
+        velocity at all. Each particle remembers its current position
+        <code>(x, y)</code> and its position from the <em>previous</em> step
+        <code>(oldX, oldY)</code>. The difference between the two <em>is</em>
+        the velocity, implicitly. Move a particle's <code>x</code> and its
+        effective velocity changes automatically — exactly what the constraint
+        solver needs.
+      </p>
+
+      <h2>The integration step</h2>
+      <p>
+        One step of Verlet on a particle looks like this
+        (<a href="../../src/physics/integrator.js"><code>src/physics/integrator.js</code></a>):
+      </p>
+      <pre class="math">temp   = (x, y)
+(x, y) = (x, y) + (x - oldX, y - oldY) · (1 - damping) + a · dt²
+(oldX, oldY) = temp</pre>
+      <p>
+        Reading right-to-left: the new position is the old position plus the
+        implicit velocity (scaled down by damping) plus the acceleration term.
+        Then we shuffle the old position forward so next step's
+        <code>(x - oldX)</code> gives us the updated velocity.
+      </p>
+      <blockquote>
+        <strong>Pinned particles</strong> set <code>invMass = 0</code>. The
+        integrator skips them and the constraint solver divides their
+        correction by zero weight, so they never move — no branching needed
+        downstream.
+      </blockquote>
+
+      <h2>Live demo</h2>
+      <p>
+        Drag the <em>damping</em> slider to see how under-damped motion keeps
+        energy, while <em>initial VX</em> gives the particle sideways momentum
+        on launch. Click anywhere on the canvas to relaunch the particle from
+        that spot.
+      </p>
+
+      <div class="demo">
+        <div class="demo-canvas-wrap"><canvas></canvas></div>
+        <div class="demo-controls">
+          <label>Damping
+            <input type="range" data-key="damping" min="0" max="0.1" step="0.001" value="0.01" />
+            <output data-key="damping">0.010</output>
+          </label>
+          <label>Initial VX
+            <input type="range" data-key="initialVX" min="-8" max="8" step="0.1" value="3" />
+            <output data-key="initialVX">3.00</output>
+          </label>
+          <label>Velocity
+            <span></span>
+            <output data-key="velocity">0.00 px/step</output>
+          </label>
+          <label style="align-items:end">
+            <span></span>
+            <button data-key="reset">Reset</button>
+          </label>
+        </div>
+      </div>
+
+      <h2>Where this lives in the code</h2>
+      <ul>
+        <li><a href="../../src/physics/particle.js"><code>src/physics/particle.js</code></a> — <code>makeParticle(x, y, opts)</code> factory with <code>x, y, oldX, oldY, invMass, radius</code>.</li>
+        <li><a href="../../src/physics/integrator.js"><code>src/physics/integrator.js</code></a> — <code>verletStep(p, dt, gx, gy, damping)</code> is exactly the four lines above.</li>
+      </ul>
+
+      <nav class="pager">
+        <a href="../index.html">
+          <span class="label">← Back</span>
+          Overview
+        </a>
+        <a href="./02-spring.html">
+          <span class="label">Next →</span>
+          02 · Two-particle spring
+        </a>
+      </nav>
+
+      <footer class="docs-footer">
+        <span>MIT © digster</span>
+        <span><a href="../index.html">Docs home</a></span>
+      </footer>
+    </main>
+  </div>
+  <script type="module" src="../demos/01-particle.js"></script>
+</body>
+</html>

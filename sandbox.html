@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Universe of Goo — Sandbox</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body class="game-shell sandbox-shell">
+    <header class="game-hud" id="hud">
+      <span class="hud-title">Sandbox</span>
+      <span class="hud-chip" id="hud-count">0 balls / 0 strands</span>
+      <span class="hud-chip" id="hud-type">type: basic</span>
+      <span class="hud-chip" id="hud-gravity">gravity: on</span>
+      <span class="hud-chip" id="hud-iters">iters: 8</span>
+      <span class="hud-chip" id="hud-fps">60 fps</span>
+      <nav class="hud-links">
+        <a href="./index.html">Game</a>
+        <a href="./docs/index.html">Docs</a>
+      </nav>
+    </header>
+    <main class="game-stage">
+      <canvas id="stage" width="1280" height="720" aria-label="Sandbox canvas"></canvas>
+    </main>
+    <aside class="sandbox-tools" id="tools">
+      <!-- Buttons mirror the keyboard shortcuts so the sandbox is fully
+           discoverable without reading the docs. The HUD above echoes state
+           (gravity, iters, count) so tinkering is easy to reason about. -->
+      <button data-action="spawn-basic"    data-key="1" title="Select basic (1)">Basic</button>
+      <button data-action="spawn-balloon"  data-key="2" title="Select balloon (2)">Balloon</button>
+      <button data-action="spawn-sticky"   data-key="3" title="Select sticky (3)">Sticky</button>
+      <button data-action="spawn-fixed"    data-key="4" title="Select fixed (4)">Fixed</button>
+      <span class="tool-sep"></span>
+      <button data-action="toggle-gravity" data-key="G" title="Toggle gravity (G)">Gravity</button>
+      <button data-action="toggle-pause"   data-key="P" title="Pause (P)">Pause</button>
+      <button data-action="toggle-debug"   data-key="D" title="Debug overlay (D)">Debug</button>
+      <span class="tool-sep"></span>
+      <button data-action="save"           data-key="S" title="Save snapshot (S)">Save</button>
+      <button data-action="reset"          data-key="R" title="Restore snapshot (R)">Reset</button>
+      <button data-action="clear"          data-key="C" title="Clear (C)">Clear</button>
+      <span class="tool-sep"></span>
+      <button data-action="iters-down"     data-key="-" title="Fewer iterations (-)">−</button>
+      <button data-action="iters-up"       data-key="+" title="More iterations (+)">+</button>
+    </aside>
+    <footer class="game-help">
+      Drag empty space to spawn. Drag a ball to move it. Shift-drag between two balls to link them.
+      Right-click to delete. Middle-click to pin/unpin.
+    </footer>
+    <script type="module" src="./src/sandbox.js"></script>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "id": "level-02",
+  "name": "Chasm",
+  "gravity": [0, 900],
+  "bounds": { "w": 1280, "h": 720 },
+  "iterations": 10,
+  "static": [
+    { "type": "segment", "a": [0, 560],   "b": [420, 560] },
+    { "type": "segment", "a": [420, 560], "b": [420, 720] },
+    { "type": "segment", "a": [860, 720], "b": [860, 560] },
+    { "type": "segment", "a": [860, 560], "b": [1280, 560] }
+  ],
+  "balls": [
+    { "type": "fixed",  "x": 380, "y": 540, "attached": true, "pinned": true },
+    { "type": "fixed",  "x": 900, "y": 540, "attached": true, "pinned": true },
+    { "type": "sticky", "x": 340, "y": 480, "attached": true },
+    { "type": "basic",  "x": 120, "y": 520 },
+    { "type": "basic",  "x": 160, "y": 520 },
+    { "type": "basic",  "x": 200, "y": 520 },
+    { "type": "basic",  "x": 240, "y": 520 },
+    { "type": "sticky", "x": 280, "y": 520 },
+    { "type": "basic",  "x": 80,  "y": 520 },
+    { "type": "basic",  "x": 40,  "y": 520 }
+  ],
+  "initialStrands": [
+    [0, 2]
+  ],
+  "goal": { "x": 1140, "y": 200, "radius": 40, "required": 4 }
+}

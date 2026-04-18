@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>06 — Full goo ball · Universe of Goo</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="docs-layout">
+
+    <aside class="docs-sidebar">
+      <h1><a href="../index.html" style="color:inherit">Universe of Goo</a></h1>
+      <p class="tagline">Source-first physics docs.</p>
+      <ol>
+        <li><a href="./01-particle.html">Particle &amp; Verlet</a></li>
+        <li><a href="./02-spring.html">Two-particle spring</a></li>
+        <li><a href="./03-chain.html">Chain / rope</a></li>
+        <li><a href="./04-cloth.html">Cloth grid</a></li>
+        <li><a href="./05-tower.html">Tower stability</a></li>
+        <li><a href="./06-gooball.html" class="active">Full goo ball</a></li>
+        <li><a href="./07-balloon.html">Balloon lift</a></li>
+      </ol>
+      <div class="links">
+        <a href="../../index.html">▶ Game</a>
+        <a href="../../sandbox.html">▣ Sandbox</a>
+      </div>
+    </aside>
+
+    <main class="docs-main">
+      <h1>06 · Full goo ball</h1>
+      <p class="lede">
+        A goo ball is just a particle with a type and a pair of eyes — what
+        makes the game click is the <em>attachment rule</em>: when a free
+        ball meets a structure, which balls does it bond to?
+      </p>
+
+      <h2>Anatomy of a goo ball</h2>
+      <p>
+        In <a href="../../src/game/gooball.js"><code>src/game/gooball.js</code></a>:
+      </p>
+      <pre class="math">gooball = {
+  id, type, color,
+  attached,           // true if part of the structure, false if wandering
+  pinned,             // true for `fixed` anchors (invMass = 0)
+  particle,           // the underlying Verlet particle
+  strands,            // constraints this ball participates in
+  gazeX, gazeY,       // where the eyes look (towards cursor / motion)
+}</pre>
+      <p>
+        Each goo <em>type</em> picks a colour, a max strand count, and per-
+        step behaviour. The four shipped types are <code>basic</code>,
+        <code>balloon</code> (lifts), <code>sticky</code> (high stiffness, 3
+        strands), and <code>fixed</code> (<code>invMass = 0</code>, never
+        moves).
+      </p>
+
+      <h2>The strand-attachment rule</h2>
+      <p>
+        When a free ball is released near attached balls, we ask:
+      </p>
+      <ol>
+        <li>Which attached balls are within radius <em>R</em> of me?</li>
+        <li>Sort by distance, closest first.</li>
+        <li>
+          Walk down the list; accept a candidate only if the straight-line
+          segment to it doesn't pass through static geometry (line-of-sight).
+        </li>
+        <li>
+          Skip candidates that have already hit their type's
+          <code>maxStrands</code> cap.
+        </li>
+        <li>Take the first <em>K</em> that pass — <em>K</em> is the new ball's own <code>maxStrands</code>.</li>
+      </ol>
+      <p>
+        This is implemented in
+        <a href="../../src/game/strandRules.js"><code>src/game/strandRules.js</code></a>.
+        Line-of-sight uses a straightforward segment–segment intersection
+        check against each static collider — cheap enough at the handful-of-
+        walls scale of each level.
+      </p>
+
+      <pre class="math">candidates = balls.filter(b =&gt; b.attached &amp;&amp; dist(b, me) &lt; R)
+            .sort(by distance)
+            .filter(lineOfSight)
+            .filter(b =&gt; b.strandCount &lt; b.type.maxStrands)
+attach to first K of candidates</pre>
+
+      <h2>Live demo</h2>
+      <p>
+        A seed tower sits at the centre. <strong>Click</strong> anywhere on
+        the canvas to drop a new <code>basic</code> ball. It'll form up to
+        <em>K</em> strands (your slider) with attached balls inside radius
+        <em>R</em>, respecting line-of-sight. Drop balls through the gap in
+        the tower to watch the line-of-sight check reject candidates on the
+        far side.
+      </p>
+
+      <div class="demo">
+        <div class="demo-canvas-wrap"><canvas></canvas></div>
+        <div class="demo-controls">
+          <label>Max strands (K)
+            <input type="range" data-key="maxStrands" min="1" max="4" step="1" value="2" />
+            <output data-key="maxStrands">2</output>
+          </label>
+          <label>Radius (R)
+            <input type="range" data-key="radius" min="40" max="280" step="1" value="140" />
+            <output data-key="radius">140</output>
+          </label>
+          <label>Total balls
+            <span></span>
+            <output data-key="balls">0</output>
+          </label>
+          <label>Total strands
+            <span></span>
+            <output data-key="strands">0</output>
+          </label>
+          <label style="align-items:end">
+            <span></span>
+            <button data-key="reset">Reset</button>
+          </label>
+        </div>
+      </div>
+
+      <blockquote>
+        At <em>K = 1</em> the tower grows a hairy tree: every new ball makes
+        a single strand to its closest neighbour. At <em>K = 3</em> it
+        becomes tightly triangulated. The game ships with
+        <code>basic.maxStrands = 2</code> as the balance point.
+      </blockquote>
+
+      <nav class="pager">
+        <a href="./05-tower.html">
+          <span class="label">← Prev</span>
+          05 · Tower stability
+        </a>
+        <a href="./07-balloon.html">
+          <span class="label">Next →</span>
+          07 · Balloon lift
+        </a>
+      </nav>
+
+      <footer class="docs-footer">
+        <span>MIT © digster</span>
+        <span><a href="../index.html">Docs home</a></span>
+      </footer>
+    </main>
+  </div>
+  <script type="module" src="../demos/06-gooball.js"></script>
+</body>
+</html>

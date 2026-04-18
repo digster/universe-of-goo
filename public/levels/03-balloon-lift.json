@@ -1,0 +1,27 @@
+{
+  "id": "level-03",
+  "name": "Balloon Lift",
+  "gravity": [0, 900],
+  "bounds": { "w": 1280, "h": 720 },
+  "iterations": 10,
+  "static": [
+    { "type": "segment", "a": [0, 680], "b": [1280, 680] },
+    { "type": "segment", "a": [640, 680], "b": [640, 520] },
+    { "type": "segment", "a": [640, 520], "b": [780, 400] }
+  ],
+  "balls": [
+    { "type": "fixed",   "x": 200, "y": 660, "attached": true, "pinned": true },
+    { "type": "basic",   "x": 200, "y": 580, "attached": true },
+    { "type": "balloon", "x": 200, "y": 480, "attached": true },
+    { "type": "basic",   "x": 60,  "y": 640 },
+    { "type": "basic",   "x": 100, "y": 640 },
+    { "type": "basic",   "x": 140, "y": 640 },
+    { "type": "basic",   "x": 320, "y": 640 },
+    { "type": "balloon", "x": 360, "y": 640 },
+    { "type": "balloon", "x": 400, "y": 640 }
+  ],
+  "initialStrands": [
+    [0, 1], [1, 2]
+  ],
+  "goal": { "x": 1160, "y": 140, "radius": 44, "required": 4 }
+}

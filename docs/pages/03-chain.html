@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>03 — Chain / rope · Universe of Goo</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="docs-layout">
+
+    <aside class="docs-sidebar">
+      <h1><a href="../index.html" style="color:inherit">Universe of Goo</a></h1>
+      <p class="tagline">Source-first physics docs.</p>
+      <ol>
+        <li><a href="./01-particle.html">Particle &amp; Verlet</a></li>
+        <li><a href="./02-spring.html">Two-particle spring</a></li>
+        <li><a href="./03-chain.html" class="active">Chain / rope</a></li>
+        <li><a href="./04-cloth.html">Cloth grid</a></li>
+        <li><a href="./05-tower.html">Tower stability</a></li>
+        <li><a href="./06-gooball.html">Full goo ball</a></li>
+        <li><a href="./07-balloon.html">Balloon lift</a></li>
+      </ol>
+      <div class="links">
+        <a href="../../index.html">▶ Game</a>
+        <a href="../../sandbox.html">▣ Sandbox</a>
+      </div>
+    </aside>
+
+    <main class="docs-main">
+      <h1>03 · Chain / rope</h1>
+      <p class="lede">
+        String N particles together with single-stick constraints and you have
+        a rope. Pin one end, drag the other, crank <code>maxStretch</code>
+        down — the chain snaps at its weakest link.
+      </p>
+
+      <h2>One stick repeated</h2>
+      <p>
+        The chain has no new physics: it's 20 particles and 19 sticks. What
+        makes it interesting is that the <em>relaxation loop</em> from the
+        last page now has to propagate corrections along the whole chain.
+        That's why <code>World.step()</code> runs its constraint pass multiple
+        times per frame — a single pass only carries information between
+        immediate neighbours.
+      </p>
+
+      <h2>Breaking on overstretch</h2>
+      <p>
+        Every constraint has a <code>maxStretch</code> multiplier. When a
+        stick's current length exceeds
+        <code>restLength · maxStretch</code>, the solver flips
+        <code>c.broken = true</code> and skips correction. After the step,
+        <code>World</code> prunes broken constraints from its array — we
+        don't delete during iteration because that'd skip elements or
+        invalidate indices.
+      </p>
+      <pre class="math">if len > restLength · maxStretch:
+    c.broken = true
+    return         // leave endpoints where they are — rope is cut
+
+// ... at end of step():
+world.constraints = world.constraints.filter(c =&gt; !c.broken)</pre>
+
+      <h2>Live demo</h2>
+      <p>
+        Drag the tail — watch the pinned head stay put while tension
+        propagates up the rope. Slide <em>max stretch</em> down and pull
+        harder until the chain snaps. Reset to reform it.
+      </p>
+
+      <div class="demo">
+        <div class="demo-canvas-wrap"><canvas></canvas></div>
+        <div class="demo-controls">
+          <label>Max stretch
+            <input type="range" data-key="maxStretch" min="1.05" max="5" step="0.01" value="2.5" />
+            <output data-key="maxStretch">2.50</output>
+          </label>
+          <label>Links left
+            <span></span>
+            <output data-key="links">19</output>
+          </label>
+          <label style="align-items:end">
+            <span></span>
+            <button data-key="reset">Reset</button>
+          </label>
+        </div>
+      </div>
+
+      <h2>Why iterate?</h2>
+      <p>
+        With only one pass per frame, a pull at the tail would take 19 frames
+        to reach the pinned head. That's noticeable lag at 60 fps. Eight
+        passes already feels rigid; twenty is near-indistinguishable from a
+        true stiff rope. The cost is linear in iterations × constraints, which
+        is why the game caps at 8 and the sandbox lets you retune live with
+        <code>+</code>/<code>−</code>.
+      </p>
+
+      <nav class="pager">
+        <a href="./02-spring.html">
+          <span class="label">← Prev</span>
+          02 · Two-particle spring
+        </a>
+        <a href="./04-cloth.html">
+          <span class="label">Next →</span>
+          04 · Cloth grid
+        </a>
+      </nav>
+
+      <footer class="docs-footer">
+        <span>MIT © digster</span>
+        <span><a href="../index.html">Docs home</a></span>
+      </footer>
+    </main>
+  </div>
+  <script type="module" src="../demos/03-chain.js"></script>
+</body>
+</html>

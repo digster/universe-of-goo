@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Universe of Goo — Documentation</title>
+  <meta name="description" content="Interactive, source-first documentation for a hand-rolled Verlet physics engine inspired by World of Goo." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="docs-layout">
+
+    <!-- Sidebar: always visible TOC. Each page uses the same markup so readers
+         get the same nav affordance anywhere in the docs. -->
+    <aside class="docs-sidebar">
+      <h1>Universe of Goo</h1>
+      <p class="tagline">A physics engine taught from the source that runs the game.</p>
+      <ol>
+        <li><a href="./pages/01-particle.html">Particle &amp; Verlet</a></li>
+        <li><a href="./pages/02-spring.html">Two-particle spring</a></li>
+        <li><a href="./pages/03-chain.html">Chain / rope</a></li>
+        <li><a href="./pages/04-cloth.html">Cloth grid</a></li>
+        <li><a href="./pages/05-tower.html">Tower stability</a></li>
+        <li><a href="./pages/06-gooball.html">Full goo ball</a></li>
+        <li><a href="./pages/07-balloon.html">Balloon lift</a></li>
+      </ol>
+      <div class="links">
+        <a href="../index.html">▶ Play the game</a>
+        <a href="../sandbox.html">▣ Open sandbox</a>
+      </div>
+    </aside>
+
+    <main class="docs-main">
+      <h1>Universe of Goo</h1>
+      <p class="lede">
+        A tiny, teaching-first browser game inspired by <em>World of Goo</em>.
+        The physics engine is hand-rolled — Verlet integration, Jakobsen-style
+        constraint relaxation, circle-vs-segment collisions — so the
+        documentation can walk through the real modules that render every
+        frame of the game.
+      </p>
+
+      <h2>How to read these docs</h2>
+      <p>
+        Each page introduces one concept, then drops you into an interactive
+        canvas powered by the <em>same</em> source files the game imports. The
+        demos live in <code>docs/demos/*.js</code> and import straight from
+        <code>src/physics/*</code> — no simplified copies, no pedagogical
+        forks. If a slider changes behaviour in a demo, it would change
+        behaviour in the game too.
+      </p>
+      <p>
+        Read top-to-bottom for a full pass (each page pager-links to the next),
+        or jump by concept from the sidebar.
+      </p>
+
+      <h2>Concepts</h2>
+      <div class="hero-grid">
+        <a class="hero-card" href="./pages/01-particle.html">
+          <span class="num">01</span>
+          <h3>Particle &amp; Verlet</h3>
+          <p>Why storing a <em>previous</em> position is enough to represent velocity, and how one line of math integrates gravity without ever computing a derivative.</p>
+        </a>
+        <a class="hero-card" href="./pages/02-spring.html">
+          <span class="num">02</span>
+          <h3>Two-particle spring</h3>
+          <p>One distance constraint between two particles. Tune stiffness, rest length, and iteration count to see how iterative relaxation converges.</p>
+        </a>
+        <a class="hero-card" href="./pages/03-chain.html">
+          <span class="num">03</span>
+          <h3>Chain / rope</h3>
+          <p>N linked particles. Drag the tail to feel tension propagate; crank <code>maxStretch</code> down to snap the chain.</p>
+        </a>
+        <a class="hero-card" href="./pages/04-cloth.html">
+          <span class="num">04</span>
+          <h3>Cloth grid</h3>
+          <p>Structural &amp; shear constraints over a lattice. Pinned corners anchor the cloth; drag free particles to deform it.</p>
+        </a>
+        <a class="hero-card" href="./pages/05-tower.html">
+          <span class="num">05</span>
+          <h3>Tower stability</h3>
+          <p>A triangulated stack under gravity. Constraints are tinted by stress — watch load paths light up under load.</p>
+        </a>
+        <a class="hero-card" href="./pages/06-gooball.html">
+          <span class="num">06</span>
+          <h3>Full goo ball</h3>
+          <p>Drop balls near a seed tower; watch the <em>K-nearest with line-of-sight</em> rule decide which strands form.</p>
+        </a>
+        <a class="hero-card" href="./pages/07-balloon.html">
+          <span class="num">07</span>
+          <h3>Balloon lift</h3>
+          <p>Per-particle force accumulators. One ball lifts an entire chain when the attached weight is under budget.</p>
+        </a>
+      </div>
+
+      <h2>Running the docs offline</h2>
+      <p>
+        These docs are set up so the built version works with no server. After
+        <code>npm run build</code>, the <code>dist/docs/</code> tree uses
+        relative asset paths (<code>base: './'</code> in
+        <code>vite.config.js</code>) — so double-clicking
+        <code>dist/docs/index.html</code> in Finder loads the whole site from
+        the filesystem.
+      </p>
+      <p>
+        In dev, run <code>npm run dev</code> — the browser refuses to resolve
+        ES module imports over <code>file://</code>, so authoring requires the
+        Vite server.
+      </p>
+
+      <h2>Project layout</h2>
+      <pre><code>src/physics/    Verlet, constraints, collision — pure math, no DOM
+src/game/       Goo types, strand rules, level loader, goals
+src/render/     Canvas 2D draw layer
+src/input/      Unified pointer (mouse + touch)
+docs/demos/     Interactive demos on this site
+public/levels/  Hand-authored level JSON
+</code></pre>
+
+      <footer class="docs-footer">
+        <span>MIT © digster</span>
+        <span><a href="./pages/01-particle.html">Start: Particle &amp; Verlet →</a></span>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

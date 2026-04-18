@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>04 — Cloth grid · Universe of Goo</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="docs-layout">
+
+    <aside class="docs-sidebar">
+      <h1><a href="../index.html" style="color:inherit">Universe of Goo</a></h1>
+      <p class="tagline">Source-first physics docs.</p>
+      <ol>
+        <li><a href="./01-particle.html">Particle &amp; Verlet</a></li>
+        <li><a href="./02-spring.html">Two-particle spring</a></li>
+        <li><a href="./03-chain.html">Chain / rope</a></li>
+        <li><a href="./04-cloth.html" class="active">Cloth grid</a></li>
+        <li><a href="./05-tower.html">Tower stability</a></li>
+        <li><a href="./06-gooball.html">Full goo ball</a></li>
+        <li><a href="./07-balloon.html">Balloon lift</a></li>
+      </ol>
+      <div class="links">
+        <a href="../../index.html">▶ Game</a>
+        <a href="../../sandbox.html">▣ Sandbox</a>
+      </div>
+    </aside>
+
+    <main class="docs-main">
+      <h1>04 · Cloth grid</h1>
+      <p class="lede">
+        A rectangular lattice of particles with neighbour-constraints behaves
+        like a sheet of cloth. The trick is adding <em>shear</em> diagonals —
+        without them, the grid collapses flat at the first sideways nudge.
+      </p>
+
+      <h2>Structural vs shear constraints</h2>
+      <p>
+        Each cell of the grid has four corners. Connect them edge-to-edge
+        (up/down/left/right) and you get <strong>structural</strong>
+        constraints — these keep the fabric from stretching in either
+        principal axis. But a square can still fold to a rhombus without
+        changing any of those four lengths.
+      </p>
+      <p>
+        Add a <strong>shear</strong> diagonal (or both diagonals) and any
+        rhombus-deformation lengthens one diagonal while shortening the other
+        — which the constraint solver resists. Together they approximate the
+        fabric's resistance to in-plane deformation.
+      </p>
+      <pre class="math">for each cell (x, y) in grid:
+    structural:  (x, y) ─ (x+1, y)
+                 (x, y) ─ (x, y+1)
+    shear:       (x, y) ─ (x+1, y+1)     # diagonals weaken stretching
+                 (x+1, y) ─ (x, y+1)     #   to rhombus shapes</pre>
+      <p>
+        Bending constraints (skipping every other particle) can be added for
+        stiffer cloth — omitted here to keep the demo focused.
+      </p>
+
+      <h2>Pinning corners</h2>
+      <p>
+        The top row has several particles pinned (<code>invMass = 0</code>).
+        The constraint solver gives pinned endpoints zero weight, so the
+        surrounding fabric falls under gravity while the tacks hold firm.
+      </p>
+
+      <h2>Live demo</h2>
+      <p>
+        Toggle <em>shear</em> off to watch the cloth deflate sideways. Drag
+        any particle with the mouse to sculpt the sheet; the relaxation loop
+        handles the rest.
+      </p>
+
+      <div class="demo">
+        <div class="demo-canvas-wrap"><canvas></canvas></div>
+        <div class="demo-controls">
+          <label>Shear diagonals
+            <input type="checkbox" data-key="shear" checked />
+            <span></span>
+          </label>
+          <label>Links
+            <span></span>
+            <output data-key="links">0</output>
+          </label>
+          <label style="align-items:end">
+            <span></span>
+            <button data-key="reset">Rebuild</button>
+          </label>
+        </div>
+      </div>
+
+      <blockquote>
+        Toggling shear <em>rebuilds</em> the world — it doesn't add/remove
+        constraints live. That keeps the demo code focused on the observation
+        (shear matters) rather than constraint-array bookkeeping.
+      </blockquote>
+
+      <nav class="pager">
+        <a href="./03-chain.html">
+          <span class="label">← Prev</span>
+          03 · Chain / rope
+        </a>
+        <a href="./05-tower.html">
+          <span class="label">Next →</span>
+          05 · Tower stability
+        </a>
+      </nav>
+
+      <footer class="docs-footer">
+        <span>MIT © digster</span>
+        <span><a href="../index.html">Docs home</a></span>
+      </footer>
+    </main>
+  </div>
+  <script type="module" src="../demos/04-cloth.js"></script>
+</body>
+</html>

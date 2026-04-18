@@ -1,0 +1,137 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - heading "Universe of Goo" [level=1] [ref=e4]:
+      - link "Universe of Goo" [ref=e5] [cursor=pointer]:
+        - /url: ../index.html
+    - paragraph [ref=e6]: Source-first physics docs.
+    - list [ref=e7]:
+      - listitem [ref=e8]:
+        - link "Particle & Verlet" [ref=e9] [cursor=pointer]:
+          - /url: ./01-particle.html
+      - listitem [ref=e10]:
+        - link "Two-particle spring" [ref=e11] [cursor=pointer]:
+          - /url: ./02-spring.html
+      - listitem [ref=e12]:
+        - link "Chain / rope" [ref=e13] [cursor=pointer]:
+          - /url: ./03-chain.html
+      - listitem [ref=e14]:
+        - link "Cloth grid" [ref=e15] [cursor=pointer]:
+          - /url: ./04-cloth.html
+      - listitem [ref=e16]:
+        - link "Tower stability" [ref=e17] [cursor=pointer]:
+          - /url: ./05-tower.html
+      - listitem [ref=e18]:
+        - link "Full goo ball" [ref=e19] [cursor=pointer]:
+          - /url: ./06-gooball.html
+      - listitem [ref=e20]:
+        - link "Balloon lift" [ref=e21] [cursor=pointer]:
+          - /url: ./07-balloon.html
+    - generic [ref=e22]:
+      - link "▶ Game" [ref=e23] [cursor=pointer]:
+        - /url: ../../index.html
+      - link "▣ Sandbox" [ref=e24] [cursor=pointer]:
+        - /url: ../../sandbox.html
+  - main [ref=e25]:
+    - heading "06 · Full goo ball" [level=1] [ref=e26]
+    - paragraph [ref=e27]:
+      - text: A goo ball is just a particle with a type and a pair of eyes — what makes the game click is the
+      - emphasis [ref=e28]: attachment rule
+      - text: ": when a free ball meets a structure, which balls does it bond to?"
+    - heading "Anatomy of a goo ball" [level=2] [ref=e29]
+    - paragraph [ref=e30]:
+      - text: In
+      - link "src/game/gooball.js" [ref=e31] [cursor=pointer]:
+        - /url: ../../src/game/gooball.js
+        - code [ref=e32]: src/game/gooball.js
+      - text: ":"
+    - generic [ref=e33]: "gooball = { id, type, color, attached, // true if part of the structure, false if wandering pinned, // true for `fixed` anchors (invMass = 0) particle, // the underlying Verlet particle strands, // constraints this ball participates in gazeX, gazeY, // where the eyes look (towards cursor / motion) }"
+    - paragraph [ref=e34]:
+      - text: Each goo
+      - emphasis [ref=e35]: type
+      - text: picks a colour, a max strand count, and per- step behaviour. The four shipped types are
+      - code [ref=e36]: basic
+      - text: ","
+      - code [ref=e37]: balloon
+      - text: (lifts),
+      - code [ref=e38]: sticky
+      - text: (high stiffness, 3 strands), and
+      - code [ref=e39]: fixed
+      - text: (
+      - code [ref=e40]: invMass = 0
+      - text: ", never moves)."
+    - heading "The strand-attachment rule" [level=2] [ref=e41]
+    - paragraph [ref=e42]: "When a free ball is released near attached balls, we ask:"
+    - list [ref=e43]:
+      - listitem [ref=e44]:
+        - text: Which attached balls are within radius
+        - emphasis [ref=e45]: R
+        - text: of me?
+      - listitem [ref=e46]: Sort by distance, closest first.
+      - listitem [ref=e47]: Walk down the list; accept a candidate only if the straight-line segment to it doesn't pass through static geometry (line-of-sight).
+      - listitem [ref=e48]:
+        - text: Skip candidates that have already hit their type's
+        - code [ref=e49]: maxStrands
+        - text: cap.
+      - listitem [ref=e50]:
+        - text: Take the first
+        - emphasis [ref=e51]: K
+        - text: that pass —
+        - emphasis [ref=e52]: K
+        - text: is the new ball's own
+        - code [ref=e53]: maxStrands
+        - text: .
+    - paragraph [ref=e54]:
+      - text: This is implemented in
+      - link "src/game/strandRules.js" [ref=e55] [cursor=pointer]:
+        - /url: ../../src/game/strandRules.js
+        - code [ref=e56]: src/game/strandRules.js
+      - text: . Line-of-sight uses a straightforward segment–segment intersection check against each static collider — cheap enough at the handful-of- walls scale of each level.
+    - generic [ref=e57]: candidates = balls.filter(b => b.attached && dist(b, me) < R) .sort(by distance) .filter(lineOfSight) .filter(b => b.strandCount < b.type.maxStrands) attach to first K of candidates
+    - heading "Live demo" [level=2] [ref=e58]
+    - paragraph [ref=e59]:
+      - text: A seed tower sits at the centre.
+      - strong [ref=e60]: Click
+      - text: anywhere on the canvas to drop a new
+      - code [ref=e61]: basic
+      - text: ball. It'll form up to
+      - emphasis [ref=e62]: K
+      - text: strands (your slider) with attached balls inside radius
+      - emphasis [ref=e63]: R
+      - text: ", respecting line-of-sight. Drop balls through the gap in the tower to watch the line-of-sight check reject candidates on the far side."
+    - generic [ref=e67]:
+      - generic [ref=e68]:
+        - text: Max strands (K)
+        - slider "Max strands (K)" [ref=e69]: "2"
+        - status [ref=e70]: "2"
+      - generic [ref=e71]:
+        - text: Radius (R)
+        - slider "Radius (R)" [ref=e72]: "140"
+        - status [ref=e73]: "140"
+      - generic [ref=e74]:
+        - text: Total balls
+        - status "Total balls" [ref=e75]: "0"
+      - generic [ref=e76]:
+        - text: Total strands
+        - status "Total strands" [ref=e77]: "0"
+      - button [ref=e79] [cursor=pointer]: Reset
+    - blockquote [ref=e80]:
+      - text: At
+      - emphasis [ref=e81]: K = 1
+      - text: "the tower grows a hairy tree: every new ball makes a single strand to its closest neighbour. At"
+      - emphasis [ref=e82]: K = 3
+      - text: it becomes tightly triangulated. The game ships with
+      - code [ref=e83]: basic.maxStrands = 2
+      - text: as the balance point.
+    - navigation [ref=e84]:
+      - link "← Prev 05 · Tower stability" [ref=e85] [cursor=pointer]:
+        - /url: ./05-tower.html
+        - generic [ref=e86]: ← Prev
+        - text: 05 · Tower stability
+      - link "Next → 07 · Balloon lift" [ref=e87] [cursor=pointer]:
+        - /url: ./07-balloon.html
+        - generic [ref=e88]: Next →
+        - text: 07 · Balloon lift
+    - generic [ref=e89]:
+      - generic [ref=e90]: MIT © digster
+      - link "Docs home" [ref=e92] [cursor=pointer]:
+        - /url: ../index.html
