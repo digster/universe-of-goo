@@ -5,18 +5,31 @@ import { makeGooBall, applyPreStepBehaviour } from '../../src/game/gooball.js';
 import { makeConstraint } from '../../src/physics/constraint.js';
 
 mountDemo('.demo', ({ ctx, bounds, controls, setOutput, pointer, reset }) => {
-  const world = new World({ bounds, gravity: { x: 0, y: 900 }, iterations: 8, friction: 0.2 });
+  // Demo gravity is softer than the game's 900 so the balloon's fixed
+  // liftStrength (420, set in gootypes.js) can clearly overcome it when the
+  // toggle is on. At g=100 with a 3-ball chain, net force is ~60 up ON vs
+  // ~360 down OFF — a 6× delta that reads plainly on screen.
+  const world = new World({ bounds, gravity: { x: 0, y: 100 }, iterations: 8, friction: 0.2 });
   const floorY = bounds.h - 10;
   world.addSegment({ x: 0, y: floorY }, { x: bounds.w, y: floorY });
 
-  const anchor = makeGooBall('fixed', bounds.w * 0.5, floorY - 10, { attached: true, pinned: true });
+  const cx = bounds.w * 0.5;
+  const anchor = makeGooBall('fixed', cx, floorY - 10, { attached: true, pinned: true });
   world.addParticle(anchor.particle);
+
+  // Chain starts pre-extended at rest length (40 px links), but with sub-pixel
+  // x-jitter on each free ball. A perfectly aligned vertical chain under
+  // perfectly vertical gravity sits in an unstable equilibrium — gravity
+  // cannot tip it when lift is off, and the toggle would appear to do nothing.
+  // The jitter seeds the tipping direction, so lift-off collapses the chain
+  // toward the floor while lift-on holds it upright. Same trick as 05-tower.
+  const jitter = () => (Math.random() - 0.5) * 0.4;
   const chain = [];
-  for (let i = 0; i < 5; i++) {
-    const b = makeGooBall('basic', bounds.w * 0.5, floorY - 60 - i * 40, { attached: true });
+  for (let i = 0; i < 3; i++) {
+    const b = makeGooBall('basic', cx + jitter(), floorY - 50 - i * 40, { attached: true });
     world.addParticle(b.particle); chain.push(b);
   }
-  const balloon = makeGooBall('balloon', bounds.w * 0.5, floorY - 280, { attached: true });
+  const balloon = makeGooBall('balloon', cx + jitter(), floorY - 170, { attached: true });
   world.addParticle(balloon.particle);
 
   const link = (a, b) => world.addConstraint(
@@ -28,11 +41,9 @@ mountDemo('.demo', ({ ctx, bounds, controls, setOutput, pointer, reset }) => {
 
   return (dt) => {
     if (controls.reset.pressed) { reset(); return; }
-    // Temporarily mute lift when the checkbox is off.
     const liftOn = controls.lift.value;
-    const prev = balloon._liftMask;
-    // Override: zero out balloon force contribution by toggling `attached`
-    // semantics. Simpler: don't run pre-step behaviour when lift is off.
+    // When lift is off, skip the balloon's pre-step hook so its liftStrength
+    // force is not accumulated — gravity alone pulls the chain back down.
     for (const b of [anchor, ...chain, balloon]) {
       if (b === balloon && !liftOn) continue;
       applyPreStepBehaviour(b, world, null);
