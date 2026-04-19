@@ -127,10 +127,36 @@ See [src/game/level.js](src/game/level.js) for the full validator.
 | Command | What it does |
 |---------|--------------|
 | `npm run dev` | Vite dev server at `http://localhost:5173`. Live module reload. |
-| `npm run build` | Emits `dist/` with `base: './'` — docs tree works when double-clicked. |
+| `npm run build` | Two-pass build: game + sandbox via `vite.config.js`, then docs via `scripts/build-docs.js`. |
 | `npm run preview` | Serves the built `dist/` on port 4173 (what Playwright targets). |
+| `npm run docs:open` | Opens `dist/docs/index.html` in the default browser. |
 | `npm test` | Vitest — physics + game unit tests. |
 | `npm run e2e` | Playwright smoke tests. Builds and previews internally. |
+
+### Why two build passes?
+
+The game and sandbox are regular Vite multi-entry builds — shared modules
+get hoisted into chunks like `assets/strandRules-*.js`, which cuts bytes
+on the second page load. Those builds need HTTP: both entries
+`fetch('/levels/*.json')` at runtime, and browsers block `fetch` over
+`file://`.
+
+The docs are different. They're a teaching artifact — every reader should
+be able to clone the repo, run `npm run build`, and double-click a page
+to read offline. ES-module `import` between sibling chunks also fails
+over `file://`, so a normal chunked build breaks the moment the user
+opens `dist/docs/pages/01-particle.html` from disk.
+
+`scripts/build-docs.js` fixes this by looping over each of the 8 docs
+HTML entries and running a single-input Vite build with
+[`vite-plugin-singlefile`](https://www.npmjs.com/package/vite-plugin-singlefile)
+enabled. The plugin sets `output.inlineDynamicImports: true` (which
+Rollup disallows with multiple inputs — hence the loop) and inlines every
+JS chunk and CSS file into the emitted HTML. The result is 8
+fully self-contained HTML files with no external references.
+
+**Do not** fold the docs entries back into the main `vite.config.js` — a
+single multi-input build cannot produce self-contained HTMLs.
 
 **Key invariant**: if the Playwright canvas pixel-check fails on a docs
 page, the demo JS is probably throwing. Open the page in the browser and
@@ -152,10 +178,13 @@ docs/
   pages/01-07.html    one page per concept
   demos/*.js          matching demo scripts
   styles.css
+scripts/
+  build-docs.js       second build pass — inlines docs into self-contained HTML
 tests/       physics + game unit tests
 e2e/         Playwright smoke tests
 ```
 
 The root holds `index.html` (game), `sandbox.html`, and the Vite/Playwright
-config — each HTML file is a Rollup entry point registered in
-`vite.config.js`.
+config. `vite.config.js` registers the game + sandbox entries only; the
+8 docs entries are built one-per-Vite-run by `scripts/build-docs.js`
+(see "Why two build passes?" above).

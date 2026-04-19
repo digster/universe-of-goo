@@ -58,15 +58,22 @@ and connect them with the same proximity-based attachment rules.
 ## Running the docs offline (no dev server)
 
 ES-module `import` statements do not load over `file://`, so during
-development the dev server is required. After `npm run build`, however,
-`vite.config.js` emits fully relative asset paths (`base: './'`) so
-`dist/docs/index.html` and each `dist/docs/pages/*.html` file can be
-double-clicked open directly from the filesystem — no server needed.
+development the dev server is required. `npm run build` therefore runs a
+**second pass** (`scripts/build-docs.js`) that uses
+[`vite-plugin-singlefile`](https://www.npmjs.com/package/vite-plugin-singlefile)
+to inline every demo's JS + CSS directly into its HTML. Each
+`dist/docs/index.html` and `dist/docs/pages/*.html` is then one fully
+self-contained file — no external script, link, or modulepreload tags —
+so double-clicking it works from the filesystem, no server needed.
 
 ```bash
 npm run build
-open dist/docs/index.html
+npm run docs:open       # or: open dist/docs/index.html
 ```
+
+The game and sandbox still use the normal chunked build and need HTTP —
+they `fetch()` level JSON at runtime, which browsers also block over
+`file://`. Use `npm run preview` for those.
 
 ## Project layout
 
