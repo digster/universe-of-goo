@@ -14,3 +14,4 @@
 ## 2026-04-19
 
 - The embedded examples in the docs are not working (file:// CORS errors even after `npm run build`).
+- In the two particles spring demo in docs, the object is falling outside the bounds.

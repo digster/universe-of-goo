@@ -34,6 +34,18 @@ mountDemo('.demo', ({ ctx, bounds, controls, setOutput, pointer, reset }) => {
     if (drag) { drag.x = drag.oldX; drag.y = drag.oldY; } // pin dragged during solve
     for (let i = 0; i < iters; i++) solveConstraint(c);
 
+    // Keep both particles inside the canvas. Mirrors demo 01's reflect-with-
+    // damping style (see 01-particle.js) rather than a hard clamp, so a
+    // dropped pair bounces once or twice before settling instead of sticking.
+    // Applied after constraint iterations so a spring that pulled one ball
+    // through the floor mid-solve still gets corrected before render.
+    const R = 10;
+    for (const p of [a, b]) {
+      if (p.y > bounds.h - R) { p.y = bounds.h - R; p.oldY = p.y + (p.y - p.oldY) * 0.4; }
+      if (p.x < R)            { p.x = R;            p.oldX = p.x + (p.x - p.oldX) * 0.6; }
+      if (p.x > bounds.w - R) { p.x = bounds.w - R; p.oldX = p.x + (p.x - p.oldX) * 0.6; }
+    }
+
     clearDemo(ctx, bounds);
     const d = Math.hypot(b.x - a.x, b.y - a.y);
     const taut = d / c.restLength;
